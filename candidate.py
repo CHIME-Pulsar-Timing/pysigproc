@@ -235,7 +235,18 @@ class Candidate(SigprocFile):
         if self.kill_mask is not None:
             assert len(self.kill_mask) == self.data.shape[1]
             data_copy = self.data.copy()
-            data_copy[:, self.kill_mask] = 0
+            data_copy2=self.data.copy()
+            data_copy2=np.delete(data_copy2,self.kill_mask,axis=1)
+            #lets do a median mid 80
+            data_range = np.max(data_copy2)-np.min(data_copy2)
+            mid = np.min(data_copy2)+data_range/2
+            low_thresh = mid-0.4*data_range
+            high_thresh = mid+0.4*data_range
+            #now lets filter these out
+            high_low_mask = np.where((data_copy2>low_thresh)&(data_copy2<high_thresh))
+            data_copy2=np.delete(data_copy2,high_low_mask)
+
+            data_copy[:, self.kill_mask] = np.median(data_copy2)
             self.data = data_copy
             del data_copy
         return self
