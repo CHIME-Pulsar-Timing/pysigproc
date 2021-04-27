@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/adam/anaconda3/envs/fetch/bin/python
 
 import matplotlib
 import h5py
@@ -53,10 +53,11 @@ def plot_h5(h5_file, show=False, save=True, detrend=True):
                                                                                  f.attrs['tsamp'], f.attrs['dm_opt'], \
                                                                                  f.attrs['snr'], f.attrs['snr_opt'], \
                                                                                  f.attrs['width']
+            ts_len = len(freq_time.sum(0))
             if width > 1:
-                ts = np.linspace(-128,128,256) * tsamp * width*1000 / 2
+                ts = np.linspace(-128,128,ts_len) * tsamp * width*1000 / 2
             else:
-                ts = np.linspace(-128,128,256) * tsamp* 1000
+                ts = np.linspace(-128,128,ts_len) * tsamp* 1000
             ax1.plot(ts, freq_time.sum(0), 'k-')
             ax1.set_ylabel('Flux (Arb. Units)')
             ax2.imshow(freq_time, aspect='auto', extent=[ts[0], ts[-1], fch1, fch1 + (nchan * foff)], interpolation='none')
@@ -75,6 +76,8 @@ def plot_h5(h5_file, show=False, save=True, detrend=True):
                 plt.close()
             return h5_file[:-3] + '.png'
     except ValueError:
+        import traceback
+        traceback.print_exc()
         return None
 
 
