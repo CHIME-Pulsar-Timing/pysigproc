@@ -246,7 +246,7 @@ class Candidate(SigprocFile):
             high_low_mask = np.where((data_copy2>low_thresh)&(data_copy2<high_thresh))
             data_copy2=np.delete(data_copy2,high_low_mask)
 
-            data_copy[:, self.kill_mask] = np.median(data_copy2)
+            data_copy[:, self.kill_mask] = np.median(data_copy)
             self.data = data_copy
             del data_copy
         return self
@@ -294,14 +294,16 @@ class Candidate(SigprocFile):
                 ts += np.concatenate([self.data[-delay_bins[ii]:, ii], self.data[:-delay_bins[ii], ii]])
             return ts
 
-    def dmtime(self, dmsteps=256, target='CPU'):
+    def dmtime(self, dmsteps=256, range_dm=0, target='CPU'):
         """
         Generates DM-time array of the candidate by dedispersing at adjacent DM values
         dmsteps: Number of DMs to dedisperse at
         :return:
         """
         if target == 'CPU':
-            range_dm = self.dm
+            if range_dm==0:
+                #if range_dm isn't specified, then set to dm
+                range_dm = self.dm
             dm_list = self.dm + np.linspace(-range_dm, range_dm, dmsteps)
             self.dmt = np.zeros((dmsteps, self.data.shape[0]), dtype=np.float32)
             for ii, dm in enumerate(dm_list):
@@ -362,15 +364,15 @@ class Candidate(SigprocFile):
         :return:
         """
         if key == 'dmt':
-            logging.debug(
+            logging.info(
                 f'Decimating dmt along axis {axis}, with factor {decimate_factor},  pre-decimation shape: {self.dmt.shape}')
             self.dmt = _decimate(self.dmt, decimate_factor, axis, pad, **kwargs)
-            logging.debug(f'Decimated dmt along axis {axis}, post-decimation shape: {self.dmt.shape}')
+            logging.info(f'Decimated dmt along axis {axis}, post-decimation shape: {self.dmt.shape}')
         elif key == 'ft':
-            logging.debug(
+            logging.info(
                 f'Decimating ft along axis {axis}, with factor {decimate_factor}, pre-decimation shape: {self.dedispersed.shape}')
             self.dedispersed = _decimate(self.dedispersed, decimate_factor, axis, pad, **kwargs)
-            logging.debug(f'Decimated ft along axis {axis}, post-decimation shape: {self.dedispersed.shape}')
+            logging.info(f'Decimated ft along axis {axis}, post-decimation shape: {self.dedispersed.shape}')
         else:
             raise AttributeError('Key can either be "dmt": DM-Time or "ft": Frequency-Time')
         return self

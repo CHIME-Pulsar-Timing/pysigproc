@@ -15,7 +15,7 @@ os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
 matplotlib.use('Agg')
 
 
-def plot_h5(h5_file, show=False, save=True, detrend=True):
+def plot_h5(h5_file, show=False, save=True, detrend=True, dm_range=[0,0]):
     """
     Plot the h5 candidate file
     :param h5_file: Address of the candidate h5 file
@@ -62,7 +62,14 @@ def plot_h5(h5_file, show=False, save=True, detrend=True):
             ax1.set_ylabel('Flux (Arb. Units)')
             ax2.imshow(freq_time, aspect='auto', extent=[ts[0], ts[-1], fch1, fch1 + (nchan * foff)], interpolation='none')
             ax2.set_ylabel('Frequency (MHz)')
-            ax3.imshow(dm_time, aspect='auto', extent=[ts[0], ts[-1], 2 * dm, 0], interpolation='none')
+            if dm_range == [0,0]:
+                dml = 0
+                dmh = 2*dm
+            else:
+                dml = dm_range[0]
+                dmh = dm_range[1]
+
+            ax3.imshow(dm_time, aspect='auto', extent=[ts[0], ts[-1], dmh, dml], interpolation='none')
             ax3.set_ylabel(r'DM (pc cm$^{-3}$)')
             ax3.set_xlabel('Time (ms)')
             ax4.text(0.2, 0, str_print, fontsize=14, ha='left', va='bottom', wrap=True)
